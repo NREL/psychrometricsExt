@@ -16,7 +16,7 @@ To load these functions into SkySpark:
 
 1. Place `psychrometrics.trio` in your SkySpark project's `io` directory.
 2. In the Folio app, run the command:
-```axon
+```
 ioReadTrio(`io/psychrometrics.trio`).each f => commit(diff(null, f, {add}))
 ```
 3. Access and/or edit the functions from within the Func app.
