@@ -15,7 +15,7 @@ doc:
   Returns
   -------
   
-  Dew-point temperature [°C]
+  Dew-point temperature (°C)
 
   References
   ----------
@@ -69,7 +69,7 @@ doc:
   Returns
   -------
   
-  Dry air density [kg/m³]
+  Dry air density (kg/m³)
 
   Notes
   -----
@@ -81,7 +81,7 @@ doc:
      sea level) is assumed.
   3. Note that at this time there is no IP unit for density supported by SkySpark. Therefore,
      converting the output of this function to IP requires some shenanigans. For instance, to
-     convert to [lb/ft³] use:
+     convert to (lb/ft³) use:
        dryAirDensity(tDB, w, p).as(1) * 1kg.to(1lb) / 1m³.to(1ft³)
      This gets you the custom unit '_lb/ft³'.
 
@@ -132,7 +132,7 @@ doc:
   -----
   1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
      sea level) is assumed.
-  2. The output humidity ratio is unitless ([kg/kg] or [lb/lb]).
+  2. The output humidity ratio is unitless (kg/kg or lb/lb).
 
   References
   ----------
@@ -196,7 +196,7 @@ doc:
   -----
   1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
      sea level) is assumed.
-  2. The output humidity ratio is unitless ([kg/kg] or [lb/lb]).
+  2. The output humidity ratio is unitless (kg/kg or lb/lb).
 
   References
   ----------
@@ -238,22 +238,22 @@ doc:
   Returns
   -------
   
-  Moist air specific enthalpy [kJ/kg]
+  Moist air specific enthalpy (kJ/kg)
 
   Notes
   -----
   1. This function returns specific enthalpy in SI units,
        h = 1.006*tDB + w * (2501 + 1.86*tDB)
      in which
-     - h = specific enthalpy [kJ/kg],
-     - tDB = dry bulb temperature [°C], and
+     - h = specific enthalpy (kJ/kg),
+     - tDB = dry bulb temperature (°C), and
      - w = humidity ratio.
      
      The equivalent IP calculation is:
        h = 0.240*tDB + w * (1061 + 0.444*tDB)
      in which
-     - h = specific enthalpy [BTU/lb],
-     - tDB = dry bulb temperature [°F],
+     - h = specific enthalpy (BTU/lb),
+     - tDB = dry bulb temperature (°F),
      - w = humidity ratio.
      
      Because SI specific enthalpy is referenced to 0°C and IP specific enthalpy to 0°F, there is
@@ -295,7 +295,7 @@ doc:
   Returns
   -------
   
-  Water vapor partial pressure [kPa]
+  Water vapor partial pressure (kPa)
 
   References
   ----------
@@ -328,7 +328,7 @@ doc:
   Returns
   -------
   
-  Relative humidity [%RH]
+  Relative humidity (%RH)
 
   Notes
   -----
@@ -373,7 +373,7 @@ doc:
   Returns
   -------
   
-  Relative humidity [%RH]
+  Relative humidity (%RH)
 
   Notes
   -----
@@ -413,7 +413,7 @@ doc:
   Returns
   -------
   
-  Water vapor saturation pressure [kPa]
+  Water vapor saturation pressure (kPa)
 
   References
   ----------
@@ -475,7 +475,7 @@ doc:
   Returns
   -------
   
-  Standard atmospheric pressure [kPa]
+  Standard atmospheric pressure (kPa)
 
   References
   ----------
@@ -502,7 +502,7 @@ psychrometrics
 doc:
   Computes standard atmospheric temperature given elevation. Ported from 'STD_Temp' VBA function in
   Eric Kozubal's psychrometrics spreadsheet.
-
+  
   Parameters
   ----------
   
@@ -511,8 +511,8 @@ doc:
   Returns
   -------
   
-  Standard atmospheric temperature
-
+  Standard atmospheric temperature (°C)
+  
   References
   ----------
   1. Equation (4), p. 1.1, *ASHRAE Fundamentals Handbook (2013), SI Edition*
@@ -554,7 +554,7 @@ doc:
   Returns
   -------
   
-  Wet bulb temperature [°C]
+  Wet bulb temperature (°C)
 
   Notes
   -----
