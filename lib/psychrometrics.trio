@@ -1,123 +1,94 @@
----
-name:relativeHumidity2
+----------------------------------------------------------------------------------------------------
+name:dewPoint
 func
 psychrometrics
+doc:
+  Computes dew-point temperature given ambient pressure and humidity ratio. Ported from 'Dew_point'
+  VBA function in Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **p:** Ambient pressure
+  - **w:** Humidity ratio
+  
+  Returns
+  -------
+  
+  Dew-point temperature [°C]
+
+  References
+  ----------
+  1. Equations (39)-(40), p. 1.9, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  /***************************************************************************************************
-    relativeHumidity2(tDB, w, p)
+  (p, w) => do
+    // Coerce inputs to SI units
+    p = p.to(1kPa)
+    w = w.to(1)
 
-    Description:
-      Computes relative humidity given dry bulb temperature, humidity ratio, and ambient pressure.
-
-      Ported from 'Rel_hum2' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      tDB: Dry bulb temperature
-      w: Humidity ratio
-      p: Ambient pressure
-
-    Returns:
-      rh: Relative humidity [%RH]
-
-    Notes:
-      1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-         sea level) is assumed.
-
-    References:
-      1. Equation (24), p. 1.8, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
-  (tDB, w, p:101kPa) => do
-    // Water vapor saturation pressure [kPa]
-    pWS: saturationPressure(tDB)
+    // Coefficients, ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
+    c14: 6.54
+    c15: 14.526
+    c16: 0.7389
+    c17: 0.09486
+    c18: 0.4569
 
     // Water vapor partial pressure [kPa]
-    pW: partialPressure(p, w)
+    pW: partialPressure(p, w, 1kPa)
 
-    // Relative humidity: Eq. (24), p. 1.8, ASHRAE Fundamentals Handbook (2013), SI Edition
-    rh: pW / pWS
+    // Alpha, ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
+    alpha: logE(pW)
 
-    // Coerce to percent RH
-    (100*rh).to(1%RH)
-  end
----
-name:stdPressure
-func
-psychrometrics
-src:
-  /***************************************************************************************************
-    stdPressure(elev, unit)
+    // Eq. (39), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
+    tDP: (c14 + c15*alpha + c16*pow(alpha,2) + c17*pow(alpha,3) + c18*pow(pW, 0.1984)).as(1°C)
 
-    Description:
-      Computes standard atmospheric pressure given elevation.
-
-      Ported from 'STD_Press' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      elev: Elevation
-
-    Returns:
-      p: Standard atmospheric pressure [kPa]
-
-    References:
-      1. Equation (3), p. 1.1, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
-  (elev) => do
-
-    // Coerce elevation to SI units
-    elev = elev.to(1m)
-
-    // Remove unit (to avoid computation exceptions)
-    elev = elev.as(1)
-
-    // Eq. (3), p. 1.1, ASHRAE Fundamentals Handbook (2013), SI Edition
-    p: 101.325 * (1 - elev*2.25577E-5).pow(5.2559)
+    // If dew point is below 0°C, use alternate equation
+    if (tDP < 0°C) do
+      // Eq. (40), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
+      tDP = (6.09 + 12.608*alpha + 0.4959*pow(alpha,2)).as(1°C)
+    end
 
     // Return
-    p.as(1kPa)
+    tDP
   end
----
+----------------------------------------------------------------------------------------------------
 name:dryAirDensity
 func
 psychrometrics
+doc:
+  Computes dry air density given dry bulb temperature, humidity ratio, and ambient pressure. Ported
+  from 'Dry_Air_Density' VBA function in Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **tDB:** Dry bulb temperature
+  - **w:** Humidity ratio
+  - **p:** Ambient pressure
+  
+  Returns
+  -------
+  
+  Dry air density [kg/m³]
+
+  Notes
+  -----
+  1. Dry air density is developed as specific volume in the ASHRAE handbook; density is the
+     reciprocal. Note that the total density of an air-water mixture is
+       rho_moist_air = rho * (1 + w)
+     where w is the humidity ratio.
+  2. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
+     sea level) is assumed.
+  3. Note that at this time there is no IP unit for density supported by SkySpark. Therefore,
+     converting the output of this function to IP requires some shenanigans. For instance, to
+     convert to [lb/ft³] use:
+       dryAirDensity(tDB, w, p).as(1) * 1kg.to(1lb) / 1m³.to(1ft³)
+     This gets you the custom unit '_lb/ft³'.
+
+  References
+  ----------
+  1. Equation (28), p. 1.9, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  /***************************************************************************************************
-    dryAirDensity(tDB, w, p)
-
-    Description:
-      Computes dry air density given dry bulb temperature, humidity ratio, and ambient pressure.
-
-      Ported from 'Dry_Air_Density' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      tDB: Dry bulb temperature
-      w: Humidity ratio
-      p: Ambient pressure
-
-    Returns:
-      rho: Dry air density [kg/m³]
-
-    Notes:
-      1. Dry air density is developed as specific volume in the ASHRAE handbook; density is the
-         reciprocal. Note that the total density of an air-water mixture is
-           rho_moist_air = rho * (1 + w),
-         where w is the humidity ratio.
-      2. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-         sea level) is assumed.
-      3. Note that at this time there is no IP unity for density supported by SkySpark. Therefore,
-         converting the output of this function to IP requires some shenanigans. For instance, to
-         convert to [lb/ft³] use:
-           dryAirDensity(tDB, w, p).as(1) * 1kg.to(1lb) / 1m³.to(1ft³)
-         This gets you the custom unit "_lb/ft³".
-
-    References:
-      1. Equation (28), p. 1.9, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
   (tDB, w, p:101kPa) => do
 
     // Coerce inputs to SI units
@@ -137,38 +108,101 @@ src:
     // Dry air density [kg/m³]
     rho: (1 / v).as(1kg/m³)
   end
----
+----------------------------------------------------------------------------------------------------
+name:humidityRatio
+func
+psychrometrics
+doc:
+  Computes humidity ratio given dry bulb temperature, wet bulb temperature, and ambient pressure.
+  Ported from 'Hum_rat' VBA function in Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **tDB:** Dry bulb temperature
+  - **tWB:** Wet bulb temperature
+  - **p:** Ambient pressure
+  
+  Returns
+  -------
+  
+  Humidity ratio (unitless)
+
+  Notes
+  -----
+  1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
+     sea level) is assumed.
+  2. The output humidity ratio is unitless ([kg/kg] or [lb/lb]).
+
+  References
+  ----------
+  1. Equation (23), p. 1.8, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+  2. Equation (35), p. 1.9, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+  3. Equation (37), p. 1.9, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+src:
+  (tDB, tWB, p:101kPa) => do
+    // Coerce inputs to SI units
+    tDB = tDB.to(1°C)
+    tWB = tWB.to(1°C)
+    p = p.to(1kPa)
+
+    // Water vapor saturation pressure [kPa] at wet bulb temperature
+    pWS: saturationPressure(tWB)
+
+    // Remove unit (to avoid computation exceptions)
+    // (Known units are still [°C] and [kPa])
+    tDB = tDB.as(1)
+    tWB = tWB.as(1)
+    p = p.as(1)
+    pWS = pWS.as(1)
+
+    // Humidity ratio for saturated air at wet bulb temperature:
+    // Eq. (23), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.8
+    ws: 0.621945 * pWS / (p - pWS)
+
+    // Compute humidity ratio
+    if (tDB >= 0°C) do
+      // Above freezing: Eq. (35), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
+      w: ( (2501 - 2.326*tWB)*ws - 1.006*(tDB - tWB) ) / ( 2501 + 1.86*tDB - 4.186*tWB )
+    else do
+      // Below freezing: Eq. (37), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
+      w: ( (2830 - 0.24*tWB)*ws - 1.006*(tDB - tWB) ) / ( 2830 + 1.86*tDB - 2.1*tWB )
+    end
+
+    // Coerce to unitless quantity [kg/kg]
+    w = w.as(1)
+  end
+----------------------------------------------------------------------------------------------------
 name:humidityRatio2
 func
 psychrometrics
+doc:
+  Computes humidity ratio given dry bulb temperature, relative humidity, and ambient pressure.
+  Ported from 'Hum_rat2' VBA function in Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **tDB:** Dry bulb temperature
+  - **rh:** Relative humidity [%RH]
+  - **p:** Ambient pressure
+  
+  Returns
+  -------
+  
+  Humidity ratio (unitless)
+
+  Notes
+  -----
+  1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
+     sea level) is assumed.
+  2. The output humidity ratio is unitless ([kg/kg] or [lb/lb]).
+
+  References
+  ----------
+  1. Equation (22), p. 1.8, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+  2. Equation (24), p. 1.8, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  /***************************************************************************************************
-    humidityRatio2(tDB, rh, p)
-
-    Description:
-      Computes humidity ratio given dry bulb temperature, relative humidity, and ambient pressure.
-
-      Ported from 'Hum_rat2' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      tDB: Dry bulb temperature
-      rh: Relative humidity [%RH]
-      p: Ambient pressure
-
-    Returns:
-      w: Humidity ratio (unitless)
-
-    Notes:
-      1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-         sea level) is assumed.
-      2. The output humitidy ratio is unitless ([kg/kg] or [lb/lb]).
-
-    References:
-      1. Equation (22), p. 1.8, ASHRAE Fundamentals Handbook (2013), SI Edition
-      2. Equation (24), p. 1.8, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
   (tDB, rh, p:101kPa) => do
     // Coerce inputs to SI units
     p = p.to(1kPa)
@@ -187,49 +221,356 @@ src:
     // Coerce to unitless quantity [kg/kg]
     w = w.as(1)
   end
----
+----------------------------------------------------------------------------------------------------
+name:moistAirEnthalpy
+func
+psychrometrics
+doc:
+  Computes moist air specific enthalpy given dry bulb temperature and humidity ratio. Ported from
+  'Enthalpy_Air_H2O' VBA function in Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **tDB: Dry bulb temperature
+  - **w: Humidity ratio
+  
+  Returns
+  -------
+  
+  Moist air specific enthalpy [kJ/kg]
+
+  Notes
+  -----
+  1. This function returns specific enthalpy in SI units,
+       h = 1.006*tDB + w * (2501 + 1.86*tDB)
+     in which
+       h = specific enthalpy [kJ/kg]
+       tDB = dry bulb temperature [°C]
+       w = humidity ratio
+     The equivalent IP calculation is:
+       h = 0.240*tDB + w * (1061 + 0.444*tDB)
+     in which
+       h = specific enthalpy [BTU/lb],
+       tDB = dry bulb temperature [°F]
+       w = humidity ratio
+     Because SI specific enthalpy is referenced to 0°C and IP specific enthalpy to 0°F, there is
+     the IP quantity is offset from the SI quantity by approximately 17.8 kJ/kg (7.66 BTU/lb).
+     (Note that this offset drifts slightly between the SI and IP approximations depending on the
+     temperature.) To convert the output of this function to IP units, use the approximation:
+       (moistAirEnthalpy(tDB, w) + 17.8kJ/kg).to(BTU/lb)
+
+  References
+  ----------
+  1. Equation (32), p. 1.9, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+src:
+  (tDB, w) => do
+
+    // Coerce inputs to SI units
+    tDB = tDB.to(1°C)
+
+    // Remove unit (to avoid computation exceptions)
+    tDB = tDB.as(1)
+
+    // Moist air specific enthalpy [kJ/kg]:
+    // Eq. (32), p. 1.9, ASHRAE Fundamentals Handbook (2013), SI Edition
+    h: ( 1.006*tDB + w*(2501 + 1.86*tDB) ).as(1kJ/kg)
+  end
+----------------------------------------------------------------------------------------------------
+name:partialPressure
+func
+psychrometrics
+doc:
+  Computes water vapor partial pressure given ambient pressure and humidity ratio. Ported from 
+  'Part_press' VBA function in Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **p:** Ambient pressure
+  - **w:** Humidity ratio
+  
+  Returns
+  -------
+  
+  Water vapor partial pressure [kPa]
+
+  References
+  ----------
+  1. Equation (38), p. 1.9, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+src:
+  (p, w, unit: null) => do
+
+    // Coerce inputs to SI units
+    p = p.to(1kPa)
+    w = w.to(1)
+
+    // Eq. (38), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
+    pW: (p * w / (0.621945 + w)).to(1kPa)
+  end
+----------------------------------------------------------------------------------------------------
+name:relativeHumidity
+func
+psychrometrics
+doc:
+  Computes relative humidity given dry bulb temperature, wet bulb temperature, and ambient pressure.
+  Ported from 'Rel_hum' VBA function in Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **tDB:** Dry bulb temperature
+  - **tWB:** Wet bulb temperature
+  - **p:** Ambient pressure
+  
+  Returns
+  -------
+  
+  Relative humidity [%RH]
+
+  Notes
+  -----
+  1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
+     sea level) is assumed.
+
+  References
+  ----------
+  1. Equation (24), p. 1.8, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+src:
+  (tDB, tWB, p:101kPa) => do
+    // Humidity ratio
+    w: humidityRatio(tDB, tWB, p)
+
+    // Water vapor saturation pressure [kPa]
+    pWS: saturationPressure(tDB)
+
+    // Water vapor partial pressure [kPa]
+    pW: partialPressure(p, w)
+
+    // Relative humidity: Eq. (24), p. 1.8, ASHRAE Fundamentals Handbook (2013), SI Edition
+    rh: pW / pWS
+
+    // Coerce to percent RH
+    (100*rh).to(1%RH)
+  end
+----------------------------------------------------------------------------------------------------
+name:relativeHumidity2
+func
+psychrometrics
+doc:
+   Computes relative humidity given dry bulb temperature, humidity ratio, and ambient pressure.
+   Ported from 'Rel_hum2' VBA function in Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **tDB:** Dry bulb temperature
+  - **w:** Humidity ratio
+  - **p:** Ambient pressure
+  
+  Returns
+  -------
+  
+  Relative humidity [%RH]
+
+  Notes
+  -----
+  1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
+     sea level) is assumed.
+
+  References
+  ----------
+  1. Equation (24), p. 1.8, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+src:
+  (tDB, w, p:101kPa) => do
+    // Water vapor saturation pressure [kPa]
+    pWS: saturationPressure(tDB)
+
+    // Water vapor partial pressure [kPa]
+    pW: partialPressure(p, w)
+
+    // Relative humidity: Eq. (24), p. 1.8, ASHRAE Fundamentals Handbook (2013), SI Edition
+    rh: pW / pWS
+
+    // Coerce to percent RH
+    (100*rh).to(1%RH)
+  end
+----------------------------------------------------------------------------------------------------
+name:saturationPressure
+func
+psychrometrics
+doc:
+  Computes water vapor saturation pressure given ambient temperature. Ported from 'Sat_press' VBA
+  function in Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **t:** Ambient temperature
+  
+  Returns
+  -------
+  
+  Water vapor saturation pressure [kPa]
+
+  References
+  ----------
+  1. Equations (5)-(6), p. 1.2, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+src:
+  (t) => do
+
+    // Compute temperature in Kelvin
+    tK: t.to(1K)
+
+    // Remove unit (to avoid computation exceptions)
+    // (We still know the unit is actually Kelvin)
+    tK = tK.as(1)
+
+    // Coefficients, ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.2
+    c01: -5.6745359E3
+    c02: 6.3925247E0
+    c03: -9.6778430E-3
+    c04: 6.2215701E-7
+    c05: 2.0747825E-9
+    c06: -9.4840240E-13
+    c07: 4.1635019E0
+
+    c08: -5.8002206E3
+    c09: 1.3914993E0
+    c10: -4.8640239E-2
+    c11: 4.1764768E-5
+    c12: -1.4452093E-8
+    c13: 6.5459673E0
+
+    if (t.to(1°C) < 0°C) do
+      // Over ice: Eq. (5), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.2
+      pWS: exp(
+        c01/tK + c02 + c03*tK + c04*pow(tK,2) + c05*pow(tK,3) + c06*pow(tK,4) + c07*logE(tK)
+        ).as(1Pa)
+    else do
+      // Over liquid water: Eq. (6), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.2
+      pWS: exp(
+        c08/tK + c09 + c10*tK + c11*pow(tK,2) + c12*pow(tK,3) + c13*logE(tK)
+        ).as(1Pa)
+    end
+
+    // Return
+    pWS.to(1kPa)
+  end
+----------------------------------------------------------------------------------------------------
+name:stdPressure
+func
+psychrometrics
+doc:
+  Computes standard atmospheric pressure given elevation. Ported from 'STD_Press' VBA function in
+  Eric Kozubal's psychrometrics spreadsheet.
+  
+  Parameters
+  ----------
+  
+  - **elev:** Elevation
+  
+  Returns
+  -------
+  
+  Standard atmospheric pressure [kPa]
+
+  References
+  ----------
+  1. Equation (3), p. 1.1, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+src:
+  (elev) => do
+
+    // Coerce elevation to SI units
+    elev = elev.to(1m)
+
+    // Remove unit (to avoid computation exceptions)
+    elev = elev.as(1)
+
+    // Eq. (3), p. 1.1, ASHRAE Fundamentals Handbook (2013), SI Edition
+    p: 101.325 * (1 - elev*2.25577E-5).pow(5.2559)
+
+    // Return
+    p.as(1kPa)
+  end
+----------------------------------------------------------------------------------------------------
+name:stdTemp
+func
+psychrometrics
+doc:
+  Computes standard atmospheric temperature given elevation. Ported from 'STD_Temp' VBA function in
+  Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **elev:** Elevation
+  
+  Returns
+  -------
+  
+  Standard atmospheric temperature
+
+  References
+  ----------
+  1. Equation (4), p. 1.1, *ASHRAE Fundamentals Handbook (2013), SI Edition*
+src:
+  (elev) => do
+
+    // Coerce elevation to SI units
+    elev = elev.to(1m)
+
+    // Remove unit (to avoid computation exceptions)
+    elev = elev.as(1)
+
+    // Eq. (3), p. 1.1, ASHRAE Fundamentals Handbook (2013), SI Edition
+    p: 15 - 0.0065*elev
+
+    // Return
+    p.as(1°C)
+  end
+----------------------------------------------------------------------------------------------------
 name:wetBulb
 func
 psychrometrics
+doc:
+  Computes wet-bulb temperature given dry bulb temperature, relative humidity, and ambient pressure.
+  Uses Newton-Raphson (NR) method to converge to correct wet bulb temperature, typically within 2-3
+  iterations. Ported from 'Wet_bulb' VBA function in Eric Kozubal's psychrometrics spreadsheet.
+
+  Parameters
+  ----------
+  
+  - **tDB:** Dry bulb temperature
+  - **rh:** Relative humidity [%RH]
+  - **p:** Ambient pressure
+  - **maxIter:** Maximum Newton-Raphson iterations (Default = 5)
+  - **tol:** Relative tolerance target (Applied to calculated humidity ratios) (Default = 1E-5)
+  - **checked:** If true, throws exception if tolerance is not met; if false returns null
+    (Default = false)
+  
+  Returns
+  -------
+  
+  Wet bulb temperature [°C]
+
+  Notes
+  -----
+  1. This function computes the correct wet bulb temperature numerically by comparing output from
+     `humidityRatio` and `humidityRatio2`. Iterations terminate when the two humidity ratio
+     calculations match within absolute tolerance 'tol' or after 'maxIter' iterations, whichever
+     comes first.
+  2. Since Axon has no while loop construct, this function uses a recursive approach.
+  3. Set 'checked' to true to throw an exception if the function does not terminate with the two
+     humidity ratios within the specified tolerance. The default value of 'checked:false' causes the
+     function to return 'null' if the humidity ratios do not match within tolerance.
+  4. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
+     sea level) is assumed.
+
+  References
+  ----------
+  See documentation for `humidityRatio` and `humidityRatio2`.
 src:
-  /***************************************************************************************************
-    wetBulb(tDB, rh, p, maxIter, tol, checked)
-
-    Description:
-      Computes wet-bulb temperature given dry bulb temperature, relative humidity, and ambient
-      pressure. Uses Newton-Raphson (NR) method to converge to correct wet bulb temperature,
-      typically within 2-3 iterations.
-
-      Ported from 'Wet_bulb' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      tDB: Dry bulb temperature
-      rh: Relative humidity [%RH]
-      p: Ambient pressure
-      maxIter: Maximum Newton-Raphson iterations (Default = 5)
-      tol: Relative tolerance target (Applied to calculated humidity ratios)
-        (Default = 1E-5)
-      checked: If true, throws exception if tolerance is not met; if false returns null
-        (Default = false)
-
-    Returns:
-      tWB: Wet bulb temperature [°C]
-
-    Notes:
-      1. This function computes the correct wet bulb temperature numerically by comparing output from
-         the humidityRatio() and humidityRatio2(). Iterations terminate when the two humidity ratio
-         calculations match within absolute tolerance 'tol' or after 'maxIter' iterations, whichever
-         comes first.
-      2. Since Axon has no loop flow control, this function uses a recursive approach.
-      3. Set 'checked' to true to throw an exception if the function does not terminate with the two
-         humidity ratios within the specified tolerance. The default value of checked=false causes the
-         function to return null if the humidity ratios do not match within tolerance.
-      4. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-         sea level) is assumed.
-      5. For references, see documentation for humidityRatio() and humidityRatio2() functions.
-
-  ***************************************************************************************************/
-
   (tDB, rh, p:101kPa, maxIter: 5, tol: 1E-5, checked: false) => do
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -292,364 +633,4 @@ src:
 
     // Return
     tWB
-  end
----
-name:relativeHumidity
-func
-psychrometrics
-src:
-  /***************************************************************************************************
-    relativeHumidity(tDB, tWB, p)
-
-    Description:
-      Computes relative humidity given dry bulb temperature, wet bulb temperature, and ambient
-      pressure.
-
-      Ported from 'Rel_hum' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      tDB: Dry bulb temperature
-      tWB: Wet bulb temperature
-      p: Ambient pressure
-
-    Returns:
-      rh: Relative humidity [%RH]
-
-    Notes:
-      1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-         sea level) is assumed.
-
-    References:
-      1. Equation (24), p. 1.8, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
-  (tDB, tWB, p:101kPa) => do
-    // Humidity ratio
-    w: humidityRatio(tDB, tWB, p)
-
-    // Water vapor saturation pressure [kPa]
-    pWS: saturationPressure(tDB)
-
-    // Water vapor partial pressure [kPa]
-    pW: partialPressure(p, w)
-
-    // Relative humidity: Eq. (24), p. 1.8, ASHRAE Fundamentals Handbook (2013), SI Edition
-    rh: pW / pWS
-
-    // Coerce to percent RH
-    (100*rh).to(1%RH)
-  end
----
-name:humidityRatio
-func
-psychrometrics
-src:
-  /***************************************************************************************************
-    humidityRatio(tDB, tWB, p)
-
-    Description:
-      Computes humidity ratio given dry bulb temperature, wet bulb temperature, and ambient pressure.
-
-      Ported from 'Hum_rat' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      tDB: Dry bulb temperature
-      tWB: Wet bulb temperature
-      p: Ambient pressure
-
-    Returns:
-      w: Humidity ratio (unitless)
-
-    Notes:
-      1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-         sea level) is assumed.
-      2. The output humitidy ratio is unitless ([kg/kg] or [lb/lb]).
-
-    References:
-      1. Equation (23), p. 1.8, ASHRAE Fundamentals Handbook (2013), SI Edition
-      2. Equation (35), p. 1.9, ASHRAE Fundamentals Handbook (2013), SI Edition
-      3. Equation (37), p. 1.9, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
-  (tDB, tWB, p:101kPa) => do
-    // Coerce inputs to SI units
-    tDB = tDB.to(1°C)
-    tWB = tWB.to(1°C)
-    p = p.to(1kPa)
-
-    // Water vapor saturation pressure [kPa] at wet bulb temperature
-    pWS: saturationPressure(tWB)
-
-    // Remove unit (to avoid computation exceptions)
-    // (Known units are still [°C] and [kPa])
-    tDB = tDB.as(1)
-    tWB = tWB.as(1)
-    p = p.as(1)
-    pWS = pWS.as(1)
-
-    // Humidity ratio for saturated air at wet bulb temperature:
-    // Eq. (23), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.8
-    ws: 0.621945 * pWS / (p - pWS)
-
-    // Compute humidity ratio
-    if (tDB >= 0°C) do
-      // Above freezing: Eq. (35), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
-      w: ( (2501 - 2.326*tWB)*ws - 1.006*(tDB - tWB) ) / ( 2501 + 1.86*tDB - 4.186*tWB )
-    else do
-      // Below freezing: Eq. (37), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
-      w: ( (2830 - 0.24*tWB)*ws - 1.006*(tDB - tWB) ) / ( 2830 + 1.86*tDB - 2.1*tWB )
-    end
-
-    // Coerce to unitless quantity [kg/kg]
-    w = w.as(1)
-  end
----
-name:partialPressure
-func
-psychrometrics
-src:
-  /***************************************************************************************************
-    partialPressure(p, w)
-
-    Description:
-      Computes water vapor partial pressure given ambient pressure and humidity ratio.
-
-      Ported from 'Part_press' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      p: Ambient pressure
-      w: Humidity ratio
-
-    Returns:
-      pW: Water vapor partial pressure [kPa]
-
-    References:
-      1. Equation (38), p. 1.9, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
-  (p, w, unit: null) => do
-
-    // Coerce inputs to SI units
-    p = p.to(1kPa)
-    w = w.to(1)
-
-    // Eq. (38), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
-    pW: (p * w / (0.621945 + w)).to(1kPa)
-  end
----
-name:stdTemp
-func
-psychrometrics
-src:
-  /***************************************************************************************************
-    stdTemp(elev)
-
-    Description:
-      Computes standard atmospheric temperature given elevation.
-
-      Ported from 'STD_Temp' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      elev: Elevation
-
-    Returns:
-      p: Standard atmospheric temperature
-
-    References:
-      1. Equation (4), p. 1.1, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
-  (elev) => do
-
-    // Coerce elevation to SI units
-    elev = elev.to(1m)
-
-    // Remove unit (to avoid computation exceptions)
-    elev = elev.as(1)
-
-    // Eq. (3), p. 1.1, ASHRAE Fundamentals Handbook (2013), SI Edition
-    p: 15 - 0.0065*elev
-
-    // Return
-    p.as(1°C)
-  end
----
-name:dewPoint
-func
-psychrometrics
-src:
-  /***************************************************************************************************
-    dewPoint(p, w)
-
-    Description:
-      Computes dew-point temperature given ambient pressure and humidity ratio.
-
-      Ported from 'Dew_point' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      p: Ambient pressure
-      w: Humidity ratio
-
-    Returns:
-      tDP: Dew-point temperature [°C]
-
-    References:
-      1. Equations (39)-(40), p. 1.9, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
-  (p, w) => do
-    // Coerce inputs to SI units
-    p = p.to(1kPa)
-    w = w.to(1)
-
-    // Coefficients, ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
-    c14: 6.54
-    c15: 14.526
-    c16: 0.7389
-    c17: 0.09486
-    c18: 0.4569
-
-    // Water vapor partial pressure [kPa]
-    pW: partialPressure(p, w, 1kPa)
-
-    // Alpha, ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
-    alpha: logE(pW)
-
-    // Eq. (39), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
-    tDP: (c14 + c15*alpha + c16*pow(alpha,2) + c17*pow(alpha,3) + c18*pow(pW, 0.1984)).as(1°C)
-
-    // If dew point is below 0°C, use alternate equation
-    if (tDP < 0°C) do
-      // Eq. (40), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.9
-      tDP = (6.09 + 12.608*alpha + 0.4959*pow(alpha,2)).as(1°C)
-    end
-
-    // Return
-    tDP
-  end
----
-name:saturationPressure
-func
-psychrometrics
-src:
-  /***************************************************************************************************
-    saturationPressure(t)
-
-    Description:
-      Computes water vapor saturation pressure given ambient temperature.
-
-      Ported from 'Sat_press' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      t: Ambient temperature
-
-    Returns:
-      pWS: Water vapor saturation pressure [kPa]
-
-    References:
-      1. Equations (5)-(6), p. 1.2, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
-  (t) => do
-
-    // Compute temperature in Kelvin
-    tK: t.to(1K)
-
-    // Remove unit (to avoid computation exceptions)
-    // (We still know the unit is actually Kelvin)
-    tK = tK.as(1)
-
-    // Coefficients, ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.2
-    c01: -5.6745359E3
-    c02: 6.3925247E0
-    c03: -9.6778430E-3
-    c04: 6.2215701E-7
-    c05: 2.0747825E-9
-    c06: -9.4840240E-13
-    c07: 4.1635019E0
-
-    c08: -5.8002206E3
-    c09: 1.3914993E0
-    c10: -4.8640239E-2
-    c11: 4.1764768E-5
-    c12: -1.4452093E-8
-    c13: 6.5459673E0
-
-    if (t.to(1°C) < 0°C) do
-      // Over ice: Eq. (5), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.2
-      pWS: exp(
-        c01/tK + c02 + c03*tK + c04*pow(tK,2) + c05*pow(tK,3) + c06*pow(tK,4) + c07*logE(tK)
-        ).as(1Pa)
-    else do
-      // Over liquid water: Eq. (6), ASHRAE Fundamentals Handbook (2013), SI Edition, p. 1.2
-      pWS: exp(
-        c08/tK + c09 + c10*tK + c11*pow(tK,2) + c12*pow(tK,3) + c13*logE(tK)
-        ).as(1Pa)
-    end
-
-    // Return
-    pWS.to(1kPa)
-  end
----
-name:moistAirEnthalpy
-func
-psychrometrics
-src:
-  /***************************************************************************************************
-    moistAirEnthalpy(tDB, w)
-
-    Description:
-      Computes moist air specific enthalpy given dry bulb temperature and humidity ratio.
-
-      Ported from 'Enthalpy_Air_H2O' VBA function in Eric Kozubal's psychrometrics spreadsheet.
-
-    Parameters:
-      tDB: Dry bulb temperature
-      w: Humidity ratio
-
-    Returns:
-      h: Moist air specific enthalpy [kJ/kg]
-
-    Notes:
-      1. This function returns specific enthalpy in SI units,
-           h = 1.006*tDB + w * (2501 + 1.86*tDB),
-         in which
-           h = specific enthalpy [kJ/kg],
-           tDB = dry bulb temperature [°C], and
-           w = humidity ratio.
-         The equivalent IP calculation is:
-           h = 0.240*tDB + w * (1061 + 0.444*tDB),
-         in which
-           h = specific enthalpy [BTU/lb],
-           tDB = dry bulb temperature [°F], and
-           w = humidity ratio.
-         Because SI specific enthalpy is referenced to 0°C and IP specific enthalpy to 0°F, there is
-         the IP quantity is offset from the SI quantity by approximately 17.8 kJ/kg (7.66 BTU/lb).
-         (Note that this offset drifts slightly between the SI and IP approximations depending on the
-         temperature.) To convert the output of this function to IP units, use the approximation:
-           (moistAirEnthalpy(tDB, w) + 17.8kJ/kg).to(BTU/lb)
-
-
-    References:
-      1. Equation (32), p. 1.9, ASHRAE Fundamentals Handbook (2013), SI Edition
-
-  ***************************************************************************************************/
-
-  (tDB, w) => do
-
-    // Coerce inputs to SI units
-    tDB = tDB.to(1°C)
-
-    // Remove unit (to avoid computation exceptions)
-    tDB = tDB.as(1)
-
-    // Moist air specific enthalpy [kJ/kg]:
-    // Eq. (32), p. 1.9, ASHRAE Fundamentals Handbook (2013), SI Edition
-    h: ( 1.006*tDB + w*(2501 + 1.86*tDB) ).as(1kJ/kg)
   end
