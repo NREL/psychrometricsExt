@@ -15,8 +15,8 @@ class Build : BuildPod
     meta    = [
                 "org.name":        "NREL",
                 "ext.name":        "psychrometrics",
-                "ext.icon24":      `fan://psychrometricsExt/res/img/icon24.png`,
-                "ext.icon72":      `fan://psychrometricsExt/res/img/icon72.png`,
+                "ext.icon24":      "fan://psychrometricsExt/res/img/icon24.png",
+                "ext.icon72":      "fan://psychrometricsExt/res/img/icon72.png",
                 "proj.name":       "psychrometricsExt",
                 "proj.uri":        "https://github.com/stephen-frank/psychrometricsExt/",
                 "license.name":    "LGPL 3.0",
