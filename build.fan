@@ -11,13 +11,13 @@ class Build : BuildPod
   {
     podName = "psychrometricsExt"
     summary = "Psychrometric Axon functions"
-    version = Version("1.1")
+    version = Version("1.1.1")
     meta    = [
                 "org.name":        "NREL",
                 "ext.name":        "psychrometrics",
                 "ext.icon24":      "fan://psychrometricsExt/res/img/icon24.png",
                 "ext.icon72":      "fan://psychrometricsExt/res/img/icon72.png",
-                "proj.name":       "psychrometricsExt",
+                "proj.name":       "psychrometrics",
                 "proj.uri":        "https://github.com/stephen-frank/psychrometricsExt/",
                 "license.name":    "LGPL 3.0",
                 "skyspark.docExt": "true",
@@ -32,7 +32,7 @@ class Build : BuildPod
     ]
   }
 
-//  @Target { help = "Publish to stackhub.org " }
-//  Void publish() { stackhubExt::PublishTask(this).run }
+  @Target { help = "Publish to stackhub.org " }
+  Void publish() { stackhubExt::PublishTask(this).run }
 
 }

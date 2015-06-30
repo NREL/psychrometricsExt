@@ -27,7 +27,7 @@ Installation
 ------------
 
 If you built from source, all that is needed to install the extension is to start (or restart)
-SkySpark. If you downloaded a release, follow these instructions to install:
+SkySpark. If you downloaded a release from Github, follow these instructions to install:
 
 1. Copy `psychrometricsExt.pod` into the `lib/fan/` directory of your SkySpark installation.
 2. Set permissions correctly on the pod (Linux/Mac).
