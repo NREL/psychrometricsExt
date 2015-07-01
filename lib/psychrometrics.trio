@@ -301,7 +301,7 @@ doc:
   ----------
   1. Equation (38), p. 1.9, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  (p, w, unit: null) => do
+  (p, w) => do
 
     // Coerce inputs to SI units
     p = p.to(1kPa)
