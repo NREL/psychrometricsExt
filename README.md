@@ -21,7 +21,7 @@ Build instructions:
 4. Execute `bin/fan docgen` to regenerate documentation.
 
 Build instructions are the same for Windows except paths use backslashes `\` and `fan` becomes
-`fan.exe`.
+`fan.bat`.
    
 Installation
 ------------
