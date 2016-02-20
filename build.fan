@@ -11,7 +11,7 @@ class Build : BuildPod
   {
     podName = "psychrometricsExt"
     summary = "Psychrometric Axon functions"
-    version = Version("1.1.1")
+    version = Version("1.2.0")
     meta    = [
                 "org.name":        "NREL",
                 "ext.name":        "psychrometrics",
@@ -32,6 +32,9 @@ class Build : BuildPod
     ]
   }
 
+  # To publish to StackHub, use: build.fan publish
+  # For more information, see: http://skyfoundry.com/doc/ext-stackhub/doc#publishing
+  
   @Target { help = "Publish to stackhub.org " }
   Void publish() { stackhubExt::PublishTask(this).run }
 
