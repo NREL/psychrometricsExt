@@ -1,5 +1,8 @@
 #! /usr/bin/env fan
 
+// Copyright (C) 2017 NREL
+// All Rights Reserved
+
 using build
 
 **
@@ -12,23 +15,27 @@ class Build : BuildPod
   {
     podName = "psychrometricsExt"
     summary = "Psychrometric Axon functions"
-    version = Version("1.2.1")
+    version = Version("1.3.0")
     meta    = [
-                "ext.name":        "psychrometrics",
-                "ext.icon24":      "fan://psychrometricsExt/res/img/icon24.png",
-                "ext.icon72":      "fan://psychrometricsExt/res/img/icon72.png",
-                "org.name":        "NREL",
-                "proj.name":       "psychrometrics",
-                "proj.uri":        "https://github.com/stephen-frank/psychrometricsExt/",
-                "license.name":    "LGPL 3.0",
+                "org.name":     "NRFL",
+                "org.uri":      "http://www.nrel.gov/",
+                "proj.name":    "psychrometricsExt",
+                "proj.uri":     "https://github.com/stephen-frank/psychrometricsExt",
+                "license.name": "LGPL 3.0",
                 "skyspark.docExt": "true",
-              ]
-    depends = ["sys 1.0"]
+                ]
+    depends = [
+				        "sys 1.0",
+                "haystack 3.0",
+                "folio 3.0",
+                "axon 3.0",
+                "skyarcd 3.0"
+              ]    
+    srcDirs = [`fan/`]
     resDirs = [`locale/`, `lib/`, `res/img/`]
-    index   =
-    [
-      "skyarc.ext": "psychrometricsExt",
-    ]
+    index   = [
+                "skyarc.ext": "psychrometricsExt::PsychrometricsExt",
+              ]
   }
 
   // To publish to StackHub, use: bin/fan /path/to/build.fan publish 
