@@ -282,6 +282,53 @@ src:
     rho: ((1 / v)*(1 + w)).as(1kg/m³)
   end
 ----------------------------------------------------------------------------------------------------
+name:moistAirSpecificHeat
+func
+psychrometrics
+doc:
+  Computes the specific heat of moist air given humidity ratio.
+
+  Parameters
+  ----------
+  
+  - **w:** Humidity ratio
+  
+  Returns
+  -------
+  
+  Specific heat of moist air (J/(kg_dry·K))
+
+  Notes
+  -----
+  1. Per ASHRAE Standard 37, the specific heat of air is used primarily for calculating sensible
+     cooling capacity. Therefore, despite being defined for moist air, it is reported per unit mass
+     of dry air, i.e. per 'kg_dry'. This allows direct use in the various ASHRAE Standard 37
+     capacity equations.
+  2. At this time, SkySpark does not support any unit for specific heat. Therefore, this function
+     returns the custom unit '_J/kg_dry/K'.
+  3. The specific heat of dry air actually varies with temperature, but is approximately 1005
+     J/(kg_dry·K) (the value used in this function) at typical room temperature. Similarly, the
+     specific heat of water vapor also varies with temperature, but this function uses the fixed
+     value 1805 J/(kg·K), following the equations in ASHRAE Standard 37 Section 7.3.3.
+     
+  References
+  ----------
+  1. Section 7.3.3, p. 11, *Methods of Testing for Rating Electrically Driven Unitary
+     Air-Conditioning and Heat Pump Equipment,* ASHRAE Standard 37-2009.
+src:
+  (w) => do
+
+    // Remove unit (to avoid computation exceptions)
+    w = w.as(1)
+
+    // Specific heat of air [J/(kg_dry·K)]:
+    // Section 7.3.3, ASHRAE Standard 37-2009
+    cp: 1005 + 1805*w
+
+    // Return
+    cp.as("_J/kg_dry/K")
+  end
+----------------------------------------------------------------------------------------------------
 name:moistAirEnthalpy
 func
 psychrometrics
