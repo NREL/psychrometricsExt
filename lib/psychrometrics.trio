@@ -321,6 +321,10 @@ doc:
      (Note that this offset drifts slightly between the SI and IP approximations depending on the
      temperature.) To convert the output of this function to IP units, use the approximation:
        (moistAirEnthalpy(tDB, w) + 17.8kJ/kg).to(BTU/lb)
+  2. SkySpark supports two sets of units for enthalpy: energy per unit mass of *moist air* (e.g.
+     'kJ/kg') and energy per unit mass of *dry air* (e.g. 'kJ/kg_dry'). The SI units are the same,
+     but the interpretation is different. The ASHRAE Fundamentals Handbook, SI Edition, specifies
+     enthalpy kilojoules per kilogram of dry air. Therefore, SkySpark output units are 'kJ/kg_dry'.
 
   References
   ----------
@@ -336,7 +340,7 @@ src:
 
     // Moist air specific enthalpy [kJ/kg]:
     // Eq. (32), p. 1.9, ASHRAE Fundamentals Handbook (2013), SI Edition
-    h: ( 1.006*tDB + w*(2501 + 1.86*tDB) ).as(1kJ/kg)
+    h: ( 1.006*tDB + w*(2501 + 1.86*tDB) ).as(1kJ/kg_dry)
   end
 ----------------------------------------------------------------------------------------------------
 name:partialPressure
