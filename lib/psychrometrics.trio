@@ -79,8 +79,8 @@ doc:
      in which w is the humidity ratio.
   2. Output units are kilogram of dry air per cubic meter. However, because SkySpark does not have a
      standard unit 'kg_dry/m³', the (more ambiguous) unit 'kg/m³' is used instead.
-  3. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-     sea level) is assumed.
+  3. If no ambient pressure is specified, a pressure of 101.325 kPa (standard atmospheric pressure
+     at sea level) is assumed.
   4. At this time there is no IP unit for density supported by SkySpark. Therefore, converting
      the output of this function to IP requires some shenanigans. For instance, to convert to
      (lb/ft³) use:
@@ -91,7 +91,7 @@ doc:
   ----------
   1. Equation (28), p. 1.9, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  (tDB, w, p:101kPa) => do
+  (tDB, w, p:stdPressure(0m)) => do
 
     // Coerce inputs to SI units
     // Note: Temperature is now in Kelvin
@@ -132,8 +132,8 @@ doc:
 
   Notes
   -----
-  1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-     sea level) is assumed.
+  1. If no ambient pressure is specified, a pressure of 101.325 kPa (standard atmospheric pressure
+     at sea level) is assumed.
   2. The output humidity ratio is unitless (kg/kg or lb/lb). SkySpark also supports the unit
      'gH₂O/kgAir'; to convert the output of this function to 'gH₂O/kgAir' multiply by 1000.
 
@@ -143,7 +143,7 @@ doc:
   2. Equation (35), p. 1.9, *ASHRAE Fundamentals Handbook (2013), SI Edition*
   3. Equation (37), p. 1.9, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  (tDB, tWB, p:101kPa) => do
+  (tDB, tWB, p:stdPressure(0m)) => do
     // Coerce inputs to SI units
     tDB = tDB.to(1°C)
     tWB = tWB.to(1°C)
@@ -197,8 +197,8 @@ doc:
 
   Notes
   -----
-  1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-     sea level) is assumed.
+  1. If no ambient pressure is specified, a pressure of 101.325 kPa (standard atmospheric pressure
+     at sea level) is assumed.
   2. The output humidity ratio is unitless (kg/kg or lb/lb). SkySpark also supports the unit
      'gH₂O/kgAir'; to convert the output of this function to 'gH₂O/kgAir' multiply by 1000.
 
@@ -207,7 +207,7 @@ doc:
   1. Equation (22), p. 1.8, *ASHRAE Fundamentals Handbook (2013), SI Edition*
   2. Equation (24), p. 1.8, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  (tDB, rh, p:101kPa) => do
+  (tDB, rh, p:stdPressure(0m)) => do
     // Coerce inputs to SI units
     p = p.to(1kPa)
     rh = rh.to(1%RH)
@@ -248,8 +248,8 @@ doc:
 
   Notes
   -----
-  1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-     sea level) is assumed.
+  1. If no ambient pressure is specified, a pressure of 101.325 kPa (standard atmospheric pressure
+     at sea level) is assumed.
   2. Note that at this time there is no IP unit for density supported by SkySpark. Therefore,
      converting the output of this function to IP requires some shenanigans. For instance, to
      convert to (lb/ft³) use:
@@ -261,7 +261,7 @@ doc:
   1. Equation (11), p. 1.8, *ASHRAE Fundamentals Handbook (2009), SI Edition*
   2. Equation (28), p. 1.9, *ASHRAE Fundamentals Handbook (2009), SI Edition*
 src:
-  (tDB, w, p:101kPa) => do
+  (tDB, w, p:stdPressure(0m)) => do
   
     // Coerce inputs to SI units
     // Note: Temperature is now in Kelvin
@@ -396,14 +396,14 @@ doc:
 
   Notes
   -----
-  1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-     sea level) is assumed.
+  1. If no ambient pressure is specified, a pressure of 101.325 kPa (standard atmospheric pressure
+     at sea level) is assumed.
 
   References
   ----------
   1. Equation (24), p. 1.8, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  (tDB, tWB, p:101kPa) => do
+  (tDB, tWB, p:stdPressure(0m)) => do
     // Humidity ratio
     w: humidityRatio(tDB, tWB, p)
 
@@ -441,14 +441,14 @@ doc:
 
   Notes
   -----
-  1. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-     sea level) is assumed.
+  1. If no ambient pressure is specified, a pressure of 101.325 kPa (standard atmospheric pressure
+     at sea level) is assumed.
 
   References
   ----------
   1. Equation (24), p. 1.8, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  (tDB, w, p:101kPa) => do
+  (tDB, w, p:stdPressure(0m)) => do
     // Water vapor saturation pressure [kPa]
     pWS: saturationPressure(tDB)
 
@@ -630,14 +630,14 @@ doc:
   3. Set 'checked' to true to throw an exception if the function does not terminate with the two
      humidity ratios within the specified tolerance. The default value of 'checked:false' causes the
      function to return NA if the humidity ratios do not match within tolerance.
-  4. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
-     sea level) is assumed.
+  4. If no ambient pressure is specified, a pressure of 101.325 kPa (standard atmospheric pressure
+     at sea level) is assumed.
 
   References
   ----------
   See documentation for `humidityRatio` and `humidityRatio2`.
 src:
-  (tDB, rh, p:101kPa, maxIter: 5, tol: 1E-5, checked: false) => do
+  (tDB, rh, p:stdPressure(0m), maxIter: 5, tol: 1E-5, checked: false) => do
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     // Setup
