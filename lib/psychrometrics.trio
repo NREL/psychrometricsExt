@@ -77,11 +77,13 @@ doc:
      reciprocal. Note that the total density of an air-water mixture is
        rho_moist_air = rho * (1 + w)
      in which w is the humidity ratio.
-  2. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
+  2. Output units are kilogram of dry air per cubic meter. However, because SkySpark does not have a
+     standard unit 'kg_dry/m³', the (more ambiguous) unit 'kg/m³' is used instead.
+  3. If no ambient pressure is specified, a pressure of 101 kPa (average atmospheric pressure at
      sea level) is assumed.
-  3. Note that at this time there is no IP unit for density supported by SkySpark. Therefore,
-     converting the output of this function to IP requires some shenanigans. For instance, to
-     convert to (lb/ft³) use:
+  4. At this time there is no IP unit for density supported by SkySpark. Therefore, converting
+     the output of this function to IP requires some shenanigans. For instance, to convert to
+     (lb/ft³) use:
        dryAirDensity(tDB, w, p).as(1) * 1kg.to(1lb) / 1m³.to(1ft³)
      This gets you the custom unit '_lb/ft³'.
 
