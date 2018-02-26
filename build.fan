@@ -1,6 +1,6 @@
 #! /usr/bin/env fan
 
-// Copyright (C) 2017 NREL
+// Copyright (C) 2018 NREL
 // All Rights Reserved
 
 using build
