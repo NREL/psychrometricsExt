@@ -20,7 +20,7 @@ class Build : BuildPod
                 "org.name":     "NRFL",
                 "org.uri":      "http://www.nrel.gov/",
                 "proj.name":    "psychrometricsExt",
-                "proj.uri":     "https://github.com/stephen-frank/psychrometricsExt",
+                "proj.uri":     "https://github.com/NREL/psychrometricsExt",
                 "license.name": "BSD-3",
                 "skyspark.docExt": "true",
                 ]
