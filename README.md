@@ -49,6 +49,5 @@ interface in the *Func* app.
 
 License
 -------
-These functions are released under the GNU Lesser General Public License (LGPL) version 3.0.
-See `LICENSE.md` for details.
+These functions are released under the BSD-3 license. See `LICENSE.md` for details.
 

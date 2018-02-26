@@ -15,13 +15,13 @@ class Build : BuildPod
   {
     podName = "psychrometricsExt"
     summary = "Psychrometric Axon functions"
-    version = Version("1.3.0")
+    version = Version("1.3.1")
     meta    = [
                 "org.name":     "NRFL",
                 "org.uri":      "http://www.nrel.gov/",
                 "proj.name":    "psychrometricsExt",
                 "proj.uri":     "https://github.com/stephen-frank/psychrometricsExt",
-                "license.name": "LGPL 3.0",
+                "license.name": "BSD-3",
                 "skyspark.docExt": "true",
                 ]
     depends = [
