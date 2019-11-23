@@ -1,0 +1,8 @@
+---
+def: ^psychrometrics
+is: ^marker
+doc:
+  Pertaining to psychrometrics, the field of science and engineering concerned
+  with air and water vapor mixtures.
+wikipedia: `https://en.wikipedia.org/wiki/Psychrometrics`
+---
