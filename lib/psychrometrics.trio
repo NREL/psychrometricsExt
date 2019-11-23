@@ -253,7 +253,7 @@ doc:
   2. Note that at this time there is no IP unit for density supported by SkySpark. Therefore,
      converting the output of this function to IP requires some shenanigans. For instance, to
      convert to (lb/ft³) use:
-     moistAirDensity(tDB, w, p).as(1) * 1kg.to(1lb) / 1m³.to(1ft³)
+       moistAirDensity(tDB, w, p).as(1) * 1kg.to(1lb) / 1m³.to(1ft³)
      This gets you the custom unit '_lb/ft³'.
 
   References
@@ -666,7 +666,7 @@ doc:
   1. Note that at this time there is no IP unit for density supported by SkySpark. Therefore,
      converting the output of this function to IP requires some shenanigans. For instance, to
      convert to (lb/ft³) use:
-     waterDensity(t).as(1) * 1kg.to(1lb) / 1m³.to(1ft³)
+       waterDensity(t).as(1) * 1kg.to(1lb) / 1m³.to(1ft³)
      This gets you the custom unit '_lb/ft³'.
 src:
   (t) => do
