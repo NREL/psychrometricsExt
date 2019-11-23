@@ -719,9 +719,6 @@ doc:
   2. There is no IP unit for specific heat defined in SkySpark.
 src:
   (t) => do
-    // Coerce input to SI units
-    t = t.to(1K)
-
     // Model coefficients
     if (t.to(1°C) <= 0°C) do
       a: 830.54602
@@ -740,7 +737,7 @@ src:
     end  
     
     // Calcs
-    sigma: (t / 228) - 1
+    sigma: (t.to(1K) / 228) - 1
     cpWater: a + b*pow(sigma,0.02) + c*pow(sigma,0.04) + d*pow(sigma,0.06) + e*pow(sigma,1.8) + f*pow(sigma,8) // kJ/(kg·K)
     
     // Output
