@@ -1,6 +1,6 @@
 #! /usr/bin/env fan
 
-// Copyright (C) 2018 NREL
+// Copyright (C) 2020 NREL
 // All Rights Reserved
 
 using build
@@ -15,7 +15,7 @@ class Build : BuildPod
   {
     podName = "psychrometricsExt"
     summary = "Psychrometric Axon functions"
-    version = Version("1.3.1")
+    version = Version("1.4.0")
     meta    = [
                 "org.name":     "NRFL",
                 "org.uri":      "http://www.nrel.gov/",
