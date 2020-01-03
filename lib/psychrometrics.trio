@@ -647,14 +647,15 @@ name:waterDensity
 func
 psychrometrics
 doc:
-  Approximates the density of pure water as a function of temperature. Ported from 'Density_Water'
-  VBA function in Eric Kozubal's psychrometrics spreadsheet. Correlations are from M. Conde
-  Engineering.
-
+  Approximates the density of pure liquid water as a function of temperature. Models are
+  fit from reference data in Table 13.2 of Wagner and Pruß (2002) and are valid within 0.1%
+  for all temperatures between freezing and boiling and pressures between 50 and 1000 kPa.
+  
   Parameters
   ----------
 
   - **t:** Water temperature
+  - **p:** Water pressure
 
   Returns
   -------
@@ -663,31 +664,36 @@ doc:
 
   Notes
   -----
-  1. Note that at this time there is no IP unit for density supported by SkySpark. Therefore,
+  1. If no pressure is specified, a pressure of 101.325 kPa (standard atmospheric pressure at
+     sea level) is assumed.
+  2. Note that at this time there is no IP unit for density supported by SkySpark. Therefore,
      converting the output of this function to IP requires some shenanigans. For instance, to
      convert to (lb/ft³) use:
        waterDensity(t).as(1) * 1kg.to(1lb) / 1m³.to(1ft³)
      This gets you the custom unit '_lb/ft³'.
+     
+  References
+  ----------
+  1. W. Wagner and A. Pruß, "The IAPWS Formulation 1995 for the Thermodynamic Properties of
+     Ordinary Water Substance for General and Scientific Use," *Journal of Physical and Chemical
+     Reference Data*, vol. 31, no. 2, pp. 387-535, 2002.
 src:
-  (t) => do
-    // Coerce input to SI units
+  (t, p:stdPressure(0m)) => do
+    // Coerce inputs to SI units
     t = t.to(1K)
+    p = p.to(1kPa)
+
+    // Pressure to MPa (not a SkySpark-supported unit)
+    p = (p / 1000).as("")
+     
+    // Proxy variable based on temperature
+    s: sqrt((t/273)-1)
     
-    // Water critical temperature
-    tCrit: 647.143K
-    
-    // Model coefficients
-    b0: 1.993771843
-    b1: 1.0985211604
-    b2: -0.5094492996
-    b3: -1.7611912427
-    b4: -44.9005480267
-    b5: -723692.2618632
+    // Fitted model coefficients
+    a: [999.848, -2.63339, 63.7589, -285.047, 0.465935] 
     
     // Calcs
-    x: 1 / 3
-    tau: 1 - (t / tCrit)
-    dens: 322 * (1 + b0*pow(tau,x) + b1*pow(tau,2*x) + b2*pow(tau,5*x) + b3*pow(tau,16*x) + b4*pow(tau,43*x) + b5*pow(tau,110*x))
+    dens: a[0] + a[1]*s + a[2]*pow(s,2) + a[3]*pow(s,3) + a[4]*p
 
     // Output
     dens.as(1kg/m³)
@@ -697,51 +703,55 @@ name:waterSpecificHeat
 func
 psychrometrics
 doc:
-  Approximates the specific heat of pure water as a function of temperature. Ported from 'Cp_Water'
-  VBA function in Eric Kozubal's psychrometrics spreadsheet. Correlations are from M. Conde
-  Engineering.
-
+  Approximates the specific heat of pure liquid water as a function of temperature. Models are
+  fit from reference data in Table 13.2 of Wagner and Pruß (2002) and are valid within 0.1%
+  for all temperatures between freezing and boiling and pressures between 50 and 1000 kPa.
+  
   Parameters
   ----------
 
   - **t:** Water temperature
+  - **p:** Water pressure
 
   Returns
   -------
 
-  Specific heat of water (J/kg°K)
+  Water density (kg/m³)
 
   Notes
   -----
-  1. The SkySpark unit of specific heat is, somewhat confusingly, *J/kg°K*, although the
+  1. If no pressure is specified, a pressure of 101.325 kPa (standard atmospheric pressure at
+     sea level) is assumed.
+  2. The SkySpark unit of specific heat is, somewhat confusingly, *J/kg°K*, although the
      SI units for energy, mass, and absolute temperature are *J*, *kg*, and *K*, respectively.
      (Note the lack of *°*.)
-  2. There is no IP unit for specific heat defined in SkySpark.
+  3. There is no IP unit for specific heat defined in SkySpark.
+     
+  References
+  ----------
+  1. W. Wagner and A. Pruß, "The IAPWS Formulation 1995 for the Thermodynamic Properties of
+     Ordinary Water Substance for General and Scientific Use," *Journal of Physical and Chemical
+     Reference Data*, vol. 31, no. 2, pp. 387-535, 2002.
 src:
-  (t) => do
-    // Model coefficients
-    if (t.to(1°C) <= 0°C) do
-      a: 830.54602
-      b: -1247.52013
-      c: -68.6035
-      d: 491.2765
-      e: -1.80692
-      f: -137.51511
-    else do
-      a: 88.7891
-      b: -120.1958
-      c: -16.9264
-      d: 52.4654
-      e: 0.10826
-      f: 0.46988
-    end  
+  (t, p:stdPressure(0m)) => do
+    // Coerce inputs to SI units
+    t = t.to(1K)
+    p = p.to(1kPa)
+
+    // Pressure to MPa (not a SkySpark-supported unit)
+    p = (p / 1000).as("")
+     
+    // Proxy variable based on temperature
+    s: sqrt((t/273)-1)
     
+    // Fitted model coefficients
+    a: [4.21931, 0.0581587, -1.97658, 7.05209, -9.99348, 5.69867, -0.00423423, 0.00351974]
+
     // Calcs
-    sigma: (t.to(1K) / 228) - 1
-    cpWater: a + b*pow(sigma,0.02) + c*pow(sigma,0.04) + d*pow(sigma,0.06) + e*pow(sigma,1.8) + f*pow(sigma,8) // kJ/(kg·K)
-    
+    cp: a[0] + a[1]*s + a[2]*pow(s,2) + a[3]*pow(s,3) + a[4]*pow(s,4) + a[5]*pow(s,5) + a[6]*p + a[7]*s*p
+
     // Output
-    (1000*cpWater).as(1J/kg°K)
+    (1000*cp).as(1J/kg°K)
   end
 ----------------------------------------------------------------------------------------------------
 name:wetBulb
