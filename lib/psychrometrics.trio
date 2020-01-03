@@ -768,11 +768,19 @@ doc:
   - **tDB:** Dry bulb temperature
   - **rh:** Relative humidity
   - **p:** Ambient pressure
-  - **maxIter:** Maximum Newton-Raphson iterations (Default = 5)
-  - **tol:** Relative tolerance target (Applied to calculated humidity ratios) (Default = 1E-5)
-  - **checked:** If true, throws exception if tolerance is not met; if false returns NA
-    (Default = false)
+  - **opts:** A dict of control options; see *Options*
+
+  Options
+  -------
   
+  The following control options are supported:
+  
+  - 'maxIter': Maximum Newton-Raphson iterations (Default = 5)
+  - 'tol': Relative tolerance target; applied to calculated humidity ratios (Default = 1E-5)
+  - 'delta': Delta for computing derivative (Default = 0.001Δ°C)
+  - 'checked': Governs action if tolerance is not met: if true, throw exception; if false return NA
+    (Default = false)
+
   Returns
   -------
   
@@ -785,9 +793,9 @@ doc:
      calculations match within absolute tolerance 'tol' or after 'maxIter' iterations, whichever
      comes first.
   2. Since Axon has no while loop construct, this function uses a recursive approach.
-  3. Set 'checked' to true to throw an exception if the function does not terminate with the two
-     humidity ratios within the specified tolerance. The default value of 'checked:false' causes the
-     function to return NA if the humidity ratios do not match within tolerance.
+  3. Set option 'checked' to true to throw an exception if the function does not terminate with the
+     two humidity ratios within the specified tolerance. The default value of 'checked:false' causes
+     the function to return NA if the humidity ratios do not match within tolerance.
   4. If no ambient pressure is specified, a pressure of 101.325 kPa (standard atmospheric pressure
      at sea level) is assumed.
 
@@ -795,38 +803,39 @@ doc:
   ----------
   See documentation for `humidityRatio` and `humidityRatio2`.
 src:
-  (tDB, rh, p:stdPressure(0m), maxIter: 5, tol: 1E-5, checked: false) => do
+  (tDB, rh, p:stdPressure(0m), opts:{maxIter:5, tol:1E-5, delta:0.001Δ°C, checked:false}) => do
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     // Setup
     //////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Delta for computing derivative
-    delta: 0.001Δ°C
     
-    // TO DO: Convert options to use an 'opts' dict
+    // Default options
+    if (opts.missing("maxIter")) opts = opts.set("maxIter", 5)
+    if (opts.missing("tol"))     opts = opts.set("tol", 1E-5)
+    if (opts.missing("delta"))   opts = opts.set("delta", 0.001Δ°C)
+    if (opts.missing("checked")) opts = opts.set("checked", false)
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     // NR Update Function
     //////////////////////////////////////////////////////////////////////////////////////////////////
     wetBulbUpdate: (tWB, iter) => do
-      // Note: 'tDB', 'rh', 'p', 'wTarget', 'maxIter', and 'delta' from outer scope
+      // Note: 'tDB', 'rh', 'p', 'wTarget', and 'opts' from outer scope
 
       // Compute humidity ratio from current value of tWB
       w: humidityRatio(tDB, tWB, p)
 
       // Check convergence
-      if (abs(wTarget - w) <= tol) return tWB
+      if (abs(wTarget - w) <= opts->tol) return tWB
 
       // Check maximum iterations; return NA if exceeded
       iter = iter + 1;
-      if (iter > maxIter) return na()
+      if (iter > opts->maxIter) return na()
 
       // NR Update...
 
       // Approximate dw / dtWB
-      w2: humidityRatio(tDB, tWB - delta, p)
-      dwdt: (w - w2).as(1) / delta.as(1)
+      w2: humidityRatio(tDB, tWB - opts->delta, p)
+      dwdt: (w - w2).as(1) / opts->delta.as(1)
 
       // Perform update
       tWB = tWB + ( (wTarget - w) / dwdt ).as(1Δ°C)
@@ -855,7 +864,7 @@ src:
     tWB = wetBulbUpdate(tWB, 0)
 
     // Throw exception if result is checked
-    if (checked and tWB == na()) throw "Newton-Raphson procedure failed to converge."
+    if (opts->checked and tWB == na()) throw "Newton-Raphson algorithm failed to converge."
 
     // Return
     tWB
