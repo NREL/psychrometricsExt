@@ -793,6 +793,8 @@ src:
 
     // Delta for computing derivative
     delta: 0.001Δ°C
+    
+    // TO DO: Convert options to use an 'opts' dict
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     // NR Update Function
