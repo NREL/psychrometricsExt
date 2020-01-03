@@ -25,8 +25,8 @@ Build instructions:
 Build instructions are the same for Windows except paths use backslashes `\` and `fan` becomes
 `fan.bat`.
 
-Note that all dependencies need to be in `lib/fan` (relative to SkySpark root); the build script
-will not find pods located in `var/lib/fan`.
+Note that all dependencies need to be in `lib/fan` (relative to SkySpark root); at the time of
+this writing the build script will not find pods located in `var/lib/fan`.
    
 Installation
 ------------
@@ -34,7 +34,8 @@ Installation
 If you built from source, all that is needed to install the extension is to start (or restart)
 SkySpark. If you downloaded a release from Github, follow these instructions to install:
 
-1. Copy `psychrometricsExt.pod` into the `lib/fan/` directory of your SkySpark installation.
+1. Copy `psychrometricsExt.pod` into the `lib/fan/` or, optionally, `var/lib/fan` directory
+   of your SkySpark installation.
 2. Set permissions correctly on the pod (Linux/Mac).
 3. From the command line, change directory to the SkySpark root directory.
 4. Execute `bin/fan docgen` to regenerate documentation.
@@ -43,13 +44,13 @@ SkySpark. If you downloaded a release from Github, follow these instructions to 
    * On Linux, you may need to `chmod +x bin/fan` first.
 5. Start (or restart) SkySpark.
 
-Following installation, you must enable the *Psychrometrics* extension in the SkySpark *Settings*
-app within each project that needs to use the functions.
+Following installation, you must enable the *psychrometrics* extension in the SkySpark *Settings*
+app, *Exts* tab, within each project that needs to use the functions.
 
 Help
 ----
 
-Function help is available in the SkySpark *Help* app under *psychrometrics* or within the help
+Function help is available in the SkySpark *Doc* app under *psychrometrics* or within the help
 interface in the *Func* app.
 
 License
