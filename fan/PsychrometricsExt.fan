@@ -1,4 +1,4 @@
-// Copyright (C) 2018 NREL
+// Copyright (C) 2021 NREL
 // All Rights Reserved
 
 using haystack
@@ -9,9 +9,8 @@ using skyarcd
 **
 @ExtMeta
 {
-  name    = "psychrometrics"
-  icon24  = `fan://psychrometricsExt/res/img/icon24.png`
-  icon72  = `fan://psychrometricsExt/res/img/icon72.png`
+  name  = "psychrometrics"
+  icon  = "paperAirplane"
   depends = Str[,]
 }
 const class PsychrometricsExt : Ext
