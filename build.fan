@@ -32,7 +32,7 @@ class Build : BuildPod
                 "skyarcd 3.1"
               ]    
     srcDirs = [`fan/`]
-    resDirs = [`locale/`, `lib/`, `res/img/`]
+    resDirs = [`locale/`, `lib/`]
     index   = [
                 "skyarc.ext": "psychrometricsExt::PsychrometricsExt",
               ]
