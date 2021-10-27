@@ -1,6 +1,6 @@
 #! /usr/bin/env fan
 
-// Copyright (C) 2020 NREL
+// Copyright (C) 2021 NREL
 // All Rights Reserved
 
 using build
@@ -27,9 +27,9 @@ class Build : BuildPod
     depends = [
 				        "sys 1.0",
                 "haystack 3.1",
-                "folio 3.0",
-                "axon 3.0",
-                "skyarcd 3.0"
+                "folio 3.1",
+                "axon 3.1",
+                "skyarcd 3.1"
               ]    
     srcDirs = [`fan/`]
     resDirs = [`locale/`, `lib/`, `res/img/`]
