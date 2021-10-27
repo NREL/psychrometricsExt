@@ -15,7 +15,7 @@ class Build : BuildPod
   {
     podName = "psychrometricsExt"
     summary = "Psychrometric Axon functions"
-    version = Version("1.4.0")
+    version = Version("1.4.1")
     meta    = [
                 "org.name":     "NRFL",
                 "org.uri":      "http://www.nrel.gov/",
@@ -26,7 +26,7 @@ class Build : BuildPod
                 ]
     depends = [
 				        "sys 1.0",
-                "haystack 3.0",
+                "haystack 3.1",
                 "folio 3.0",
                 "axon 3.0",
                 "skyarcd 3.0"

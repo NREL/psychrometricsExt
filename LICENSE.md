@@ -1,4 +1,4 @@
-**psychrometricsExt** Copyright 2018 Alliance for Sustainable Energy, LLC
+**psychrometricsExt** Copyright 2018-2021 Alliance for Sustainable Energy, LLC
 
 NOTICE: This software was developed by Alliance for Sustainable Energy, LLC ("Alliance") under
 Contract No. DE-AC36-08GO28308 with the U.S. Department of Energy and the U.S. Government retains
