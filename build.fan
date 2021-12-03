@@ -15,25 +15,20 @@ class Build : BuildPod
   {
     podName = "psychrometricsExt"
     summary = "Psychrometric Axon functions"
-    version = Version("1.4.2")
+    version = Version("1.4.3")
     meta    = [
-                "org.name":     "NRFL",
-                "org.uri":      "http://www.nrel.gov/",
-                "proj.name":    "psychrometricsExt",
-                "proj.uri":     "https://github.com/NREL/psychrometricsExt",
-                "license.name": "BSD-3",
+                "ext.name":        "psychrometrics",
+                "ext.icon":        "ruler",
+                "org.name":        "NREL",
+                "org.uri":         "http://www.nrel.gov/",
+                "proj.name":       "NREL Psychrometrics Extension",
+                "proj.uri":        "https://github.com/NREL/psychrometricsExt",
+                "license.name":    "BSD-3",
                 "skyspark.docExt": "true",
                 ]
-    depends = [
-				        "sys 1.0",
-                "haystack 3.0+",
-                "axon 3.0+",
-                "skyarcd 3.0+"
-              ]    
-    srcDirs = [`fan/`]
     resDirs = [`locale/`, `lib/`]
     index   = [
-                "skyarc.ext": "psychrometricsExt::PsychrometricsExt",
+                "skyarc.ext": "psychrometricsExt",
               ]
   }
 
