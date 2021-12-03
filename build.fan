@@ -1,6 +1,6 @@
 #! /usr/bin/env fan
 
-// Copyright (C) 2021 NREL
+// Copyright (C) 2021, Alliance for Sustainable Energy, LLC
 // All Rights Reserved
 
 using build
