@@ -2,3 +2,7 @@ The Pyschrometrics extension provides a set of functions for basic
 [psychrometric]`http://en.wikipedia.org/wiki/Psychrometrics` calculations
 implemented in Axon. These functions were ported to SkySpark by Stephen Frank
 from Excel VBA macros originally written by Eric Kozubal.
+
+Functions are individually documented. See also the
+[psychrometricsExt]`https://github.com/NREL/psychrometricsExt/releases/`
+repository on GitHub for a change log.
