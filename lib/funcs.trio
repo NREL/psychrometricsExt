@@ -575,8 +575,8 @@ name:stdPressure
 func
 psychrometrics
 doc:
-  Computes standard atmospheric pressure given elevation. Ported from 'STD_Press' VBA function in
-  Eric Kozubal's psychrometrics spreadsheet.
+  Computes standard atmospheric pressure given elevation. If no elevation is specified, sea level
+  is assumed. Ported from 'STD_Press' VBA function in Eric Kozubal's psychrometrics spreadsheet.
   
   Parameters
   ----------
@@ -592,7 +592,7 @@ doc:
   ----------
   1. Equation (3), p. 1.1, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  (elev) => do
+  (elev:0m) => do
 
     // Coerce elevation to SI units
     elev = elev.to(1m)
@@ -611,8 +611,8 @@ name:stdTemp
 func
 psychrometrics
 doc:
-  Computes standard atmospheric temperature given elevation. Ported from 'STD_Temp' VBA function in
-  Eric Kozubal's psychrometrics spreadsheet.
+  Computes standard atmospheric temperature given elevation. If no elevation is specified, sea level
+  is assumed. Ported from 'STD_Temp' VBA function in Eric Kozubal's psychrometrics spreadsheet.
   
   Parameters
   ----------
@@ -628,7 +628,7 @@ doc:
   ----------
   1. Equation (4), p. 1.1, *ASHRAE Fundamentals Handbook (2013), SI Edition*
 src:
-  (elev) => do
+  (elev:0m) => do
 
     // Coerce elevation to SI units
     elev = elev.to(1m)
